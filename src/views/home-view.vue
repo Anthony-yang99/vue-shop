@@ -15,12 +15,17 @@
         <!-- 折叠按钮 -->
         <div class="fold" @click="foldMenu">|||</div>
         <!-- 左侧边栏菜单 -->
+        <!-- this.$route.path会获取当前路由路径,刷新之后也可以知道当前要激活的item项
+        default-active表示当前激活的路由地址是谁，就激活谁
+         -->
         <el-menu
           class="el-menu-vertical-demo"
           unique-opened
           text-color="#51575f"
           :collapse="iscollapse"
           :collapse-transition="false"
+          active-text-color="#409EFF"
+          :default-active="this.$route.path"
           router
         >
           <el-submenu
