@@ -15,7 +15,12 @@ import {
   Submenu,
   Breadcrumb,
   BreadcrumbItem,
-  Card
+  Card,
+  Row,
+  Col,
+  Table,
+  TableColumn,
+  Switch
 } from 'element-ui'
 
 Vue.use(Button)
@@ -33,5 +38,10 @@ Vue.use(Submenu)
 Vue.use(Breadcrumb)
 Vue.use(BreadcrumbItem)
 Vue.use(Card)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
 // 把消息提示绑定在vue原型上
 Vue.prototype.$message = Message
