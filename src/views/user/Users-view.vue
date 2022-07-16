@@ -47,10 +47,20 @@
           </template>
         </el-table-column>
         <el-table-column prop="" label="操作">
-          <template class="caozuo">
+          <template slot-scope="scope">
             <!-- {{ scope.row }} -->
-            <el-button type="primary" icon="el-icon-edit"></el-button>
-            <el-button type="danger" icon="el-icon-delete"></el-button>
+            <!-- 修改用户 -->
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              @click="editDialog(scope.row.id)"
+            ></el-button>
+            <!-- 删除用户 -->
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              @click="removeUser(scope.row.id)"
+            ></el-button>
             <el-tooltip
               class="item"
               effect="dark"
@@ -109,6 +119,35 @@
         <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 修改用户 -->
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editdialogVisible"
+      width="50%"
+      @close="editDialogClose"
+    >
+      <!-- 修改用的表单 -->
+      <el-form
+        :model="editForm"
+        :rules="editFormRules"
+        ref="editFormRef"
+        label-width="70px"
+      >
+        <el-form-item label="用户名">
+          <el-input v-model="editForm.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="editForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editdialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editUser">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -156,7 +195,7 @@ export default {
         email: '',
         mobile: ''
       },
-      // 表单验证规则
+      // 添加用户表单验证规则
       addUserrules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -166,6 +205,27 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
         ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          {
+            validator: checkEmail,
+            trigger: 'blur'
+          }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          {
+            validator: checkMobile,
+            trigger: 'blur'
+          }
+        ]
+      },
+      // 修改用户弹窗的隐藏于显示
+      editdialogVisible: false,
+      // 修改用户查询的用户数据
+      editForm: {},
+      // 修改用户的表单验证规则
+      editFormRules: {
         email: [
           { required: true, message: '请输入邮箱', trigger: 'blur' },
           {
@@ -242,16 +302,65 @@ export default {
       if (res.meta.status !== 201) return this.$message.error('添加用户失败')
       this.$message.success('添加用户成功')
       this.getUserList()
+    },
+    // 修改用户的弹窗弹出
+    async editDialog(id) {
+      this.editdialogVisible = true
+      const { data: res } = await this.$http.get('users/' + id)
+      // console.log(res.data.id)
+      if (res.meta.status !== 200) return this.$message.error('查询数据失败')
+      this.editForm = res.data
+    },
+    // 修改表单关闭重置
+    editDialogClose() {
+      this.$refs.editFormRef.resetFields()
+    },
+    // 修改用户信息函数
+    editUser() {
+      this.$refs.editFormRef.validate((vali) => {
+        // console.log(vali)
+        if (!vali) return this.$message.error('请输入合法字段')
+      })
+      this.editUserquer()
+      this.editdialogVisible = false
+      this.getUserList()
+      this.$message.success('修改成功')
+    },
+    // 修改用户请求函数
+    async editUserquer() {
+      const { data: res } = await this.$http.put('users/' + this.editForm.id, {
+        email: this.editForm.email,
+        mobile: this.editForm.mobile
+      })
+      // console.log(res)
+      if (res.meta.status !== 200) return this.$message.error('修改失败')
+    },
+    // 删除用户
+    async removeUser(id) {
+      const result = await this.$confirm(
+        '此操作将永久删除该用户, 是否继续?',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+        // 捕获点取消后的error，并返回出来
+      ).catch((err) => {
+        return err
+      })
+      // console.log(result)
+      if (result !== 'confirm') return this.$message.info('已取消删除')
+      const { data: res } = await this.$http.delete('users/' + id)
+      if (res.meta.status !== 200) return this.$message.error('删除失败')
+      this.$message.success('删除成功')
+      this.getUserList()
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
-.el-table-column > .caozuo {
-  display: flex;
-  align-content: space-between;
-}
 .el-pagination {
   margin-top: 15px;
 }
