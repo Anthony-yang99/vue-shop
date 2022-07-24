@@ -8,8 +8,13 @@ import './assets/css/global.css'
 import '@/assets/fonts/iconfont.css'
 // 导入axios
 import axios from 'axios'
+// 导入表格插件
+import ZkTable from 'vue-table-with-tree-grid'
 
 Vue.config.productionTip = false
+
+// 把表格插件注册为vue组件
+Vue.component('tableTree', ZkTable)
 
 // axios拦截器确保有权限获取数据
 axios.interceptors.request.use(config => {
